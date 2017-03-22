@@ -1,0 +1,26 @@
+#!/usr/bin/stap
+
+global oncpubts
+global start_time
+
+probe begin {
+    warn(sprintf("Tracing %d in user-space only...\n", target()))
+}
+
+probe timer.profile {
+    if (pid() == target()) {
+        oncpubts[ubacktrace()] <<< 1;
+    }
+}
+
+probe timer.s(10) {
+exit()
+}
+
+probe end {
+    printf("-----oncpu--------")
+    foreach ([ubt] in oncpubts- limit 10240) {
+        print_stack(ubt)
+        printf("\t%d\n", @count(oncpubts[ubt]));
+    }
+}

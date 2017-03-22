@@ -1,0 +1,55 @@
+#!/usr/bin/stap
+
+global offcpubts,oncpubts
+global start_time
+
+probe begin {
+    warn(sprintf("Tracing %d in user-space and kernel-space...\n", target()))
+}
+
+probe timer.profile {
+    if (pid() == target()) {
+        oncpubts[backtrace(),ubacktrace()] <<< 1;
+    }
+}
+
+probe scheduler.cpu_off {
+    if (pid() == target()) {
+        start_time[tid()] = gettimeofday_us()
+    }
+}
+
+probe scheduler.cpu_on {
+    if (pid() == target()) {
+        t = tid()
+        begin = start_time[t]
+        if (begin > 0) {
+            elapsed = gettimeofday_us() - begin
+            if (elapsed >= 1) {
+                offcpubts[backtrace(),ubacktrace()] <<< elapsed
+            }
+            delete start_time[t]
+        }
+    }
+}
+
+probe timer.s(10) {
+exit()
+}
+
+probe end {
+    printf("-----oncpu--------")
+    foreach ([bt,ubt] in oncpubts- limit 10240) {
+            print_stack(bt)
+        print_stack(ubt)
+        printf("\t%d\n", @count(oncpubts[bt,ubt]));
+    }
+    printf("-----offcpu--------")
+    foreach ([bt,ubt] in offcpubts- limit 10240) {
+            print_stack(bt)
+        print_stack(ubt)
+        printf("\t%d\n", @count(offcpubts[bt,ubt]))
+    }
+
+}
+

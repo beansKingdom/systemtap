@@ -1,0 +1,18 @@
+#!/usr/bin/stap
+
+global n_count,sum
+
+probe process("/data/mysql3306/bin/mysqld").function("mysql_execute_command").return {
+        n_count[tid()]++
+}
+
+probe timer.s(5){
+        printf ("======================\n")
+        foreach (tid in n_count) {
+                sum = sum + n_count[tid]
+        }
+        printf ("sum is %d\n", sum)
+        delete n_count
+}
+
+
