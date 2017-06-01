@@ -38,16 +38,16 @@ exit()
 }
 
 probe end {
-    printf("-----oncpu--------")
     foreach ([bt,ubt] in oncpubts- limit 10240) {
-            print_stack(bt)
+        print_stack(bt)
         print_stack(ubt)
+        printf("oncpu\n")
         printf("\t%d\n", @count(oncpubts[bt,ubt]));
     }
-    printf("-----offcpu--------")
     foreach ([bt,ubt] in offcpubts- limit 10240) {
-            print_stack(bt)
+        print_stack(bt)
         print_stack(ubt)
+        printf("offcpu\n")
         printf("\t%d\n", @count(offcpubts[bt,ubt]))
     }
 

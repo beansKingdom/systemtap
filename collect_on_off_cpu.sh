@@ -16,5 +16,3 @@ stap -v -D MAXSKIPPED=100000 -D MAXACTION=10000000 -D MAXMAPENTRIES=300000 -g --
 /home/helingyun/FlameGraph/stackcollapse-stap.pl out.stap > out.folded
 /home/helingyun/FlameGraph/flamegraph.pl out.folded  > out.svg
 
-#/opt/perf_test/FlameGraph/stackcollapse-stap.pl out.stap > out.folded
-#/opt/perf_test/FlameGraph/flamegraph.pl out.folded > out.svg
